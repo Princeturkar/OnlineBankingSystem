@@ -71,6 +71,16 @@ public class WithdrawServlet extends HttpServlet {
             updateStmt.setInt(2, accountNo);
             updateStmt.executeUpdate();
 
+            // Log transaction
+            PreparedStatement logStmt = conn.prepareStatement(
+                "INSERT INTO transactions (account_no, transaction_type, amount, description) VALUES (?, ?, ?, ?)"
+            );
+            logStmt.setInt(1, accountNo);
+            logStmt.setString(2, "WITHDRAW");
+            logStmt.setDouble(3, amount);
+            logStmt.setString(4, "Cash withdrawal");
+            logStmt.executeUpdate();
+
             conn.close();
             
             session.setAttribute("balance", balance - amount);
@@ -88,8 +98,15 @@ public class WithdrawServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
         if (session.getAttribute("account") == null) {
             response.sendRedirect("login.jsp");
+            return;
+        }
+
+        if ("admin".equals(role)) {
+            response.sendRedirect("adminDashboard");
             return;
         }
 

@@ -19,9 +19,12 @@
     
     <div class="dashboard-container">
         <div class="dashboard-content">
-            <div class="page-header">
-                <h2>📊 Transaction History</h2>
-                <p>View your recent banking transactions</p>
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2>📊 Transaction History</h2>
+                    <p>View your recent banking transactions</p>
+                </div>
+                <a href="downloadStatement" class="btn" style="background: #28a745; text-decoration: none;">📄 Download PDF</a>
             </div>
             
             <% if (request.getAttribute("error") != null) { %>

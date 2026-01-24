@@ -89,6 +89,24 @@ public class TransferServlet extends HttpServlet {
             addStmt.setInt(2, toAccount);
             addStmt.executeUpdate();
             
+            // Log for sender
+            PreparedStatement logSender = conn.prepareStatement(
+                "INSERT INTO transactions (account_no, transaction_type, amount, description) VALUES (?, ?, ?, ?)");
+            logSender.setInt(1, fromAccount);
+            logSender.setString(2, "TRANSFER_OUT");
+            logSender.setDouble(3, amount);
+            logSender.setString(4, "Transfer to Acc: " + toAccount);
+            logSender.executeUpdate();
+
+            // Log for receiver
+            PreparedStatement logReceiver = conn.prepareStatement(
+                "INSERT INTO transactions (account_no, transaction_type, amount, description) VALUES (?, ?, ?, ?)");
+            logReceiver.setInt(1, toAccount);
+            logReceiver.setString(2, "TRANSFER_IN");
+            logReceiver.setDouble(3, amount);
+            logReceiver.setString(4, "Transfer from Acc: " + fromAccount);
+            logReceiver.executeUpdate();
+
             conn.commit();
             
             // Update session balance
@@ -120,10 +138,18 @@ public class TransferServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String role = (String) session.getAttribute("role");
+
         if (session.getAttribute("account") == null) {
             response.sendRedirect("login.jsp");
             return;
         }
+
+        if ("admin".equals(role)) {
+            response.sendRedirect("adminDashboard");
+            return;
+        }
+
         request.getRequestDispatcher("transfer.jsp").forward(request, response);
     }
 }

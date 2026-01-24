@@ -22,8 +22,21 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
+        String securityQuestion = request.getParameter("securityQuestion");
+        String securityAnswer = request.getParameter("securityAnswer");
+        String role = request.getParameter("role");
+        String adminCode = request.getParameter("adminCode");
 
         try {
+            // Security check for Admin role
+            if ("admin".equals(role)) {
+                if (!"ADMIN123".equals(adminCode)) {
+                    request.setAttribute("error", "Invalid Admin Authorization Code!");
+                    request.getRequestDispatcher("register.jsp").forward(request, response);
+                    return;
+                }
+            }
+            
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
@@ -50,13 +63,16 @@ public class RegisterServlet extends HttpServlet {
             rs.close();
 
             String insertSql =
-                "INSERT INTO users(username, email, password, phone, balance) VALUES (?, ?, ?, ?, 0)";
+                "INSERT INTO users(username, email, password, phone, security_question, security_answer, role, balance) VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
 
             PreparedStatement stmt = conn.prepareStatement(insertSql);
             stmt.setString(1, username);
             stmt.setString(2, email);
             stmt.setString(3, password);
             stmt.setString(4, phone);
+            stmt.setString(5, securityQuestion);
+            stmt.setString(6, securityAnswer);
+            stmt.setString(7, role);
 
             stmt.executeUpdate();
             stmt.close();

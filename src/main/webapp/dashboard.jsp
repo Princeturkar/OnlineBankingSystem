@@ -18,12 +18,24 @@
         <div class="brand">SecureBank</div>
         <div style="display: flex; align-items: center;">
             <span class="user-info">Welcome, <%= session.getAttribute("name") %></span>
+            <span style="background: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 15px; text-transform: uppercase;">
+                <%= session.getAttribute("role") %>
+            </span>
             <a href="logout" class="logout-btn">Logout</a>
         </div>
     </div>
     
     <div class="dashboard-container">
         <div class="dashboard-content">
+            <div class="profile-section" style="text-align: center; margin-bottom: 20px;">
+                <img src="uploads/<%= session.getAttribute("profile_picture") != null ? session.getAttribute("profile_picture") : "default_profile.png" %>" 
+                     alt="Profile" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+                <form action="uploadProfile" method="post" enctype="multipart/form-data" style="margin-top: 10px;">
+                    <input type="file" name="profilePic" accept="image/*" required style="font-size: 12px;">
+                    <button type="submit" class="btn" style="padding: 5px 10px; font-size: 12px;">Update Photo</button>
+                </form>
+            </div>
+            
             <div class="balance-card">
                 <h2>Account Balance</h2>
                 <div class="balance-amount">$<%= String.format("%.2f", (Double)session.getAttribute("balance")) %></div>
