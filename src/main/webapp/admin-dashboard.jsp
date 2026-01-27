@@ -11,6 +11,8 @@
         th { background-color: #f4f4f4; }
         .status-active { color: green; font-weight: bold; }
         .status-frozen { color: red; font-weight: bold; }
+        .log-success { color: green; font-weight: 600; }
+        .log-failed { color: red; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -79,7 +81,12 @@
                 <td><%= logs.getString("email") %></td>
                 <td><%= logs.getTimestamp("login_time") %></td>
                 <td><%= logs.getString("ip_address") %></td>
-                <td><%= logs.getString("status") %></td>
+                <td>
+                    <% String logStatus = logs.getString("status"); %>
+                    <span class="<%= logStatus.equals("SUCCESS") ? "log-success" : "log-failed" %>">
+                        <%= logStatus %>
+                    </span>
+                </td>
             </tr>
             <% } %>
         </table>

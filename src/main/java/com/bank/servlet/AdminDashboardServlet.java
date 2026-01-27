@@ -46,8 +46,11 @@ public class AdminDashboardServlet extends HttpServlet {
             ResultSet rsUsers = userStmt.executeQuery();
             request.setAttribute("userList", rsUsers);
 
-            // Fetch Recent Logs
-            String logSql = "SELECT * FROM login_logs ORDER BY login_time DESC LIMIT 10";
+            // Fetch Recent Logs (Excluding Admin activity)
+            String logSql = "SELECT l.* FROM login_logs l " +
+                            "LEFT JOIN users u ON l.email = u.email " +
+                            "WHERE (u.role != 'admin' OR u.role IS NULL) " +
+                            "ORDER BY l.login_time DESC LIMIT 10";
             PreparedStatement logStmt = conn.prepareStatement(logSql);
             ResultSet rsLogs = logStmt.executeQuery();
             request.setAttribute("logList", rsLogs);

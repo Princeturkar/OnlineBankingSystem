@@ -33,6 +33,19 @@ public class DepositServlet extends HttpServlet {
             Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/banking_db", "root", "prince07");
             
+            // Check status
+            String statusSql = "SELECT status FROM users WHERE account_no = ?";
+            PreparedStatement statusStmt = conn.prepareStatement(statusSql);
+            statusStmt.setInt(1, accountNo);
+            ResultSet statusRs = statusStmt.executeQuery();
+            
+            if (statusRs.next() && "frozen".equals(statusRs.getString("status"))) {
+                request.setAttribute("error", "Your account is frozen!");
+                request.getRequestDispatcher("deposit.jsp").forward(request, response);
+                conn.close();
+                return;
+            }
+
             // Update balance
             String updateSql = "UPDATE users SET balance = balance + ? WHERE account_no = ?";
             PreparedStatement stmt = conn.prepareStatement(updateSql);

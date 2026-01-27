@@ -44,7 +44,7 @@ public class WithdrawServlet extends HttpServlet {
             );
 
             PreparedStatement checkStmt = conn.prepareStatement(
-                "SELECT balance FROM users WHERE account_no=?"
+                "SELECT balance, status FROM users WHERE account_no=?"
             );
             checkStmt.setInt(1, accountNo);
             ResultSet rs = checkStmt.executeQuery();
@@ -55,6 +55,13 @@ public class WithdrawServlet extends HttpServlet {
                 return;
             }
 
+            if ("frozen".equals(rs.getString("status"))) {
+                request.setAttribute("error", "Your account is frozen!");
+                request.getRequestDispatcher("withdraw.jsp").forward(request, response);
+                conn.close();
+                return;
+            }
+            
             double balance = rs.getDouble("balance");
 
             if (balance < amount) {

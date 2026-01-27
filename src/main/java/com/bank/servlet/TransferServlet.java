@@ -43,14 +43,20 @@ public class TransferServlet extends HttpServlet {
             
             conn.setAutoCommit(false);
             
-            // Check sender balance
+            // Check sender balance and status
             PreparedStatement checkStmt = conn.prepareStatement(
-                "SELECT balance FROM users WHERE account_no = ?");
+                "SELECT balance, status FROM users WHERE account_no = ?");
             checkStmt.setInt(1, fromAccount);
             ResultSet rs = checkStmt.executeQuery();
             
             if (!rs.next()) {
                 request.setAttribute("error", "Account not found!");
+                request.getRequestDispatcher("transfer.jsp").forward(request, response);
+                return;
+            }
+
+            if ("frozen".equals(rs.getString("status"))) {
+                request.setAttribute("error", "Your account is frozen!");
                 request.getRequestDispatcher("transfer.jsp").forward(request, response);
                 return;
             }
@@ -62,15 +68,22 @@ public class TransferServlet extends HttpServlet {
                 return;
             }
             
-            // Check receiver exists
+            // Check receiver exists and status
             PreparedStatement receiverStmt = conn.prepareStatement(
-                "SELECT username FROM users WHERE account_no = ?");
+                "SELECT username, status FROM users WHERE account_no = ?");
             receiverStmt.setInt(1, toAccount);
             ResultSet receiverRs = receiverStmt.executeQuery();
             
             if (!receiverRs.next()) {
                 conn.rollback();
                 request.setAttribute("error", "Receiver account " + toAccount + " not found!");
+                request.getRequestDispatcher("transfer.jsp").forward(request, response);
+                return;
+            }
+
+            if ("frozen".equals(receiverRs.getString("status"))) {
+                conn.rollback();
+                request.setAttribute("error", "Receiver account is frozen!");
                 request.getRequestDispatcher("transfer.jsp").forward(request, response);
                 return;
             }
